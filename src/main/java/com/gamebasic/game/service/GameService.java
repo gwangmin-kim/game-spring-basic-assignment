@@ -1,6 +1,5 @@
 package com.gamebasic.game.service;
 
-import com.gamebasic.common.exception.GameNotFoundException;
 import com.gamebasic.game.dto.*;
 import com.gamebasic.game.entity.Game;
 import com.gamebasic.game.repository.GameRepository;
@@ -8,7 +7,6 @@ import com.gamebasic.runcard.dto.CardResponse;
 import com.gamebasic.runcard.dto.RunCardRequest;
 import com.gamebasic.runcard.entity.RunCard;
 import com.gamebasic.runcard.repository.RunCardRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -112,10 +110,7 @@ public class GameService {
     // TODO (Lv 7): 게임 상세 조회. 주석을 풀고 구현하세요.
     @Transactional(readOnly = true)
     public GameDetailResponse getGame(Long gameId) {
-        Game game = gameRepository.findById(gameId).orElseThrow(
-                () -> new GameNotFoundException(gameId)
-        );
-
+        Game game = findGame(gameId);
         List<CardResponse> deck = runCardRepository.findAllByGameOrderByIdAsc(game)
                 .stream().map(
                 card -> new CardResponse(
@@ -139,9 +134,7 @@ public class GameService {
 
     @Transactional
     public void renameGame(Long gameId, RenameRequest request) {
-        Game game = gameRepository.findById(gameId).orElseThrow(
-                () -> new GameNotFoundException(gameId)
-        );
+        Game game = findGame(gameId);
         game.rename(request.getPlayerName());
     }
 

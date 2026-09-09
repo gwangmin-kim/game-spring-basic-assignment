@@ -25,6 +25,11 @@ public class GameController {
         return ResponseEntity.ok(gameService.getGames());
     }
 
+    @GetMapping("/games/{gameId}")
+    public ResponseEntity<GameDetailResponse> getGame(@PathVariable Long gameId) {
+        return ResponseEntity.ok(gameService.getGame(gameId));
+    }
+
     @PostMapping("/games")
     public ResponseEntity<GameDetailResponse> createGame(@Valid @RequestBody CreateRequest request) {
         GameDetailResponse created = gameService.createGame(request);

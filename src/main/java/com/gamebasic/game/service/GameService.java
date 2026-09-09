@@ -1,5 +1,6 @@
 package com.gamebasic.game.service;
 
+import com.gamebasic.common.exception.GameNotFoundException;
 import com.gamebasic.game.dto.CreateRequest;
 import com.gamebasic.game.dto.GameDetailResponse;
 import com.gamebasic.game.dto.GameSummaryResponse;
@@ -111,9 +112,32 @@ public class GameService {
     }
 
     // TODO (Lv 7): 게임 상세 조회. 주석을 풀고 구현하세요.
-    // @Transactional(readOnly = true)
-    // public GameDetailResponse getGame(Long gameId) {
-    // }
+    @Transactional(readOnly = true)
+    public GameDetailResponse getGame(Long gameId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(
+                () -> new GameNotFoundException(gameId)
+        );
+
+        List<CardResponse> deck = runCardRepository.findAllByGameOrderByIdAsc(game)
+                .stream().map(
+                card -> new CardResponse(
+                        card.getId(),
+                        card.getCardType(),
+                        card.getAcquiredFloor())
+                ).toList();
+
+        return new GameDetailResponse(
+                game.getId(),
+                game.getPlayerName(),
+                game.getCurrentHp(),
+                game.getCurrentFloor(),
+                game.getPhase(),
+                game.getStatus(),
+                deck,
+                game.getCreatedAt(),
+                game.getUpdatedAt()
+        );
+    }
 
     // TODO (Lv 8): 플레이어 이름 변경 — 변경 감지로 수정
     // TODO (Lv 8): 게임 삭제

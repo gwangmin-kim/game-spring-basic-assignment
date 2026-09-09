@@ -1,16 +1,14 @@
 package com.gamebasic.game.service;
 
 import com.gamebasic.common.exception.GameNotFoundException;
-import com.gamebasic.game.dto.CreateRequest;
-import com.gamebasic.game.dto.GameDetailResponse;
-import com.gamebasic.game.dto.GameSummaryResponse;
-import com.gamebasic.game.dto.ProgressRequest;
+import com.gamebasic.game.dto.*;
 import com.gamebasic.game.entity.Game;
 import com.gamebasic.game.repository.GameRepository;
 import com.gamebasic.runcard.dto.CardResponse;
 import com.gamebasic.runcard.dto.RunCardRequest;
 import com.gamebasic.runcard.entity.RunCard;
 import com.gamebasic.runcard.repository.RunCardRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -137,6 +135,19 @@ public class GameService {
                 game.getCreatedAt(),
                 game.getUpdatedAt()
         );
+    }
+
+    @Transactional
+    public void renameGame(Long gameId, RenameRequest request) {
+        Game game = gameRepository.findById(gameId).orElseThrow(
+                () -> new GameNotFoundException(gameId)
+        );
+        game.rename(request.getPlayerName());
+    }
+
+    @Transactional
+    public void deleteGame(Long gameId) {
+        
     }
 
     // TODO (Lv 8): 플레이어 이름 변경 — 변경 감지로 수정

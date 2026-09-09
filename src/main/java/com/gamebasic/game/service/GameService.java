@@ -93,7 +93,7 @@ public class GameService {
     // TODO (Lv 7): 게임 목록 조회. 주석을 풀고 구현하세요.
     @Transactional(readOnly = true)
     public List<GameSummaryResponse> getGames() {
-        List<Game> games = gameRepository.findAll();
+        List<Game> games = gameRepository.findAllByOrderByIdDesc();
         return games.stream().map(
                 game -> new GameSummaryResponse(
                         game.getId(),

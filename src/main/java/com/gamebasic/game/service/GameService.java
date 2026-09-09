@@ -2,6 +2,7 @@ package com.gamebasic.game.service;
 
 import com.gamebasic.game.dto.CreateRequest;
 import com.gamebasic.game.dto.GameDetailResponse;
+import com.gamebasic.game.dto.GameSummaryResponse;
 import com.gamebasic.game.dto.ProgressRequest;
 import com.gamebasic.game.entity.Game;
 import com.gamebasic.game.repository.GameRepository;
@@ -35,13 +36,15 @@ public class GameService {
             deck.add(new CardResponse(card.getId(), card.getCardType(), card.getAcquiredFloor()));
         }
         return new GameDetailResponse(
-            game.getId(),
-            game.getPlayerName(),
-            game.getCurrentHp(),
-            game.getCurrentFloor(),
-            game.getPhase(),
-            game.getStatus(),
-            deck
+                game.getId(),
+                game.getPlayerName(),
+                game.getCurrentHp(),
+                game.getCurrentFloor(),
+                game.getPhase(),
+                game.getStatus(),
+                deck,
+                game.getCreatedAt(),
+                game.getUpdatedAt()
         );
     }
 
@@ -76,20 +79,36 @@ public class GameService {
             deck.add(new CardResponse(card.getId(), card.getCardType(), card.getAcquiredFloor()));
         }
         return new GameDetailResponse(
-            game.getId(),
-            game.getPlayerName(),
-            game.getCurrentHp(),
-            game.getCurrentFloor(),
-            game.getPhase(),
-            game.getStatus(),
-            deck
+                game.getId(),
+                game.getPlayerName(),
+                game.getCurrentHp(),
+                game.getCurrentFloor(),
+                game.getPhase(),
+                game.getStatus(),
+                deck,
+                game.getCreatedAt(),
+                game.getUpdatedAt()
         );
     }
 
     // TODO (Lv 7): 게임 목록 조회. 주석을 풀고 구현하세요.
-    // @Transactional(readOnly = true)
-    // public List<GameSummaryResponse> getGames() {
-    // }
+    @Transactional(readOnly = true)
+    public List<GameSummaryResponse> getGames() {
+        List<Game> games = gameRepository.findAll();
+        return games.stream().map(
+                game -> new GameSummaryResponse(
+                        game.getId(),
+                        game.getPlayerName(),
+                        game.getCurrentHp(),
+                        game.getCurrentFloor(),
+                        game.getPhase(),
+                        game.getStatus(),
+                        runCardRepository.countByGame(game),
+                        game.getCreatedAt(),
+                        game.getUpdatedAt()
+                )
+            ).toList();
+    }
 
     // TODO (Lv 7): 게임 상세 조회. 주석을 풀고 구현하세요.
     // @Transactional(readOnly = true)

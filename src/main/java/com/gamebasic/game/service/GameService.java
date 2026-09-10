@@ -5,7 +5,6 @@ import com.gamebasic.common.exception.GameNotFoundException;
 import com.gamebasic.game.dto.*;
 import com.gamebasic.game.entity.Game;
 import com.gamebasic.game.repository.GameRepository;
-import com.gamebasic.runcard.dto.CardResponse;
 import com.gamebasic.runcard.dto.DeckCount;
 import com.gamebasic.runcard.dto.RunCardRequest;
 import com.gamebasic.runcard.entity.RunCard;
@@ -31,21 +30,7 @@ public class GameService {
         Game game = gameRepository.save(new Game(request.getPlayerName()));
         saveDeck(game, request.getDeck());
         List<RunCard> cards = runCardRepository.findAllByGameOrderByIdAsc(game);
-        List<CardResponse> deck = new ArrayList<>();
-        for (RunCard card : cards) {
-            deck.add(new CardResponse(card.getId(), card.getCardType(), card.getAcquiredFloor()));
-        }
-        return new GameDetailResponse(
-                game.getId(),
-                game.getPlayerName(),
-                game.getCurrentHp(),
-                game.getCurrentFloor(),
-                game.getPhase(),
-                game.getStatus(),
-                deck,
-                game.getCreatedAt(),
-                game.getUpdatedAt()
-        );
+        return GameDetailResponse.from(game, cards);
     }
 
     private void saveDeck(Game game, List<RunCardRequest> deck) {
@@ -78,21 +63,7 @@ public class GameService {
         runCardRepository.deleteAllByGame(game);
         saveDeck(game, request.getDeck());
         List<RunCard> cards = runCardRepository.findAllByGameOrderByIdAsc(game);
-        List<CardResponse> deck = new ArrayList<>();
-        for (RunCard card : cards) {
-            deck.add(new CardResponse(card.getId(), card.getCardType(), card.getAcquiredFloor()));
-        }
-        return new GameDetailResponse(
-                game.getId(),
-                game.getPlayerName(),
-                game.getCurrentHp(),
-                game.getCurrentFloor(),
-                game.getPhase(),
-                game.getStatus(),
-                deck,
-                game.getCreatedAt(),
-                game.getUpdatedAt()
-        );
+        return GameDetailResponse.from(game, cards);
     }
 
     // TODO (Lv 7): 게임 목록 조회. 주석을 풀고 구현하세요.
@@ -102,44 +73,17 @@ public class GameService {
         Map<Long, Integer> countMap = runCardRepository.countByGames(games).stream().collect(
                 Collectors.toMap(DeckCount::getGame_id, DeckCount::getDeck_size));
 
-        return games.stream().map(
-                game -> new GameSummaryResponse(
-                        game.getId(),
-                        game.getPlayerName(),
-                        game.getCurrentHp(),
-                        game.getCurrentFloor(),
-                        game.getPhase(),
-                        game.getStatus(),
-                        countMap.getOrDefault(game.getId(), 0),
-                        game.getCreatedAt(),
-                        game.getUpdatedAt()
-                )
-            ).toList();
+        return games.stream()
+                .map(game -> GameSummaryResponse.from(game, countMap.getOrDefault(game.getId(), 0)))
+                .toList();
     }
 
     // TODO (Lv 7): 게임 상세 조회. 주석을 풀고 구현하세요.
     @Transactional(readOnly = true)
     public GameDetailResponse getGame(Long gameId) {
         Game game = findGame(gameId);
-        List<CardResponse> deck = runCardRepository.findAllByGameOrderByIdAsc(game)
-                .stream().map(
-                card -> new CardResponse(
-                        card.getId(),
-                        card.getCardType(),
-                        card.getAcquiredFloor())
-                ).toList();
-
-        return new GameDetailResponse(
-                game.getId(),
-                game.getPlayerName(),
-                game.getCurrentHp(),
-                game.getCurrentFloor(),
-                game.getPhase(),
-                game.getStatus(),
-                deck,
-                game.getCreatedAt(),
-                game.getUpdatedAt()
-        );
+        List<RunCard> cards = runCardRepository.findAllByGameOrderByIdAsc(game);
+        return GameDetailResponse.from(game, cards);
     }
 
     // TODO (Lv 8): 플레이어 이름 변경 — 변경 감지로 수정

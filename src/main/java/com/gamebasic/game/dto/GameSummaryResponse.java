@@ -21,4 +21,18 @@ public class GameSummaryResponse {
     private final int deckSize;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
+
+    public static GameSummaryResponse from(Game game, int deckSize) {
+        return new GameSummaryResponse(
+                game.getId(),
+                game.getPlayerName(),
+                game.getCurrentHp(),
+                game.getCurrentFloor(),
+                game.getPhase(),
+                game.getStatus(),
+                deckSize,
+                game.getCreatedAt(),
+                game.getUpdatedAt()
+        );
+    }
 }
